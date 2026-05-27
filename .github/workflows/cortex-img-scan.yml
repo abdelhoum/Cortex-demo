@@ -1,7 +1,7 @@
 name: Cortex CLI - Container Image Scan Demo
 
 on:
-  workflow_dispatch: # Allows you to trigger the demo manually from the UI
+  workflow_dispatch: # Permet de lancer la démo manuellement depuis l'interface
   push:
     branches: [ main ]
 
@@ -14,30 +14,31 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # Strict requirement for Cortex CLI CWP/Image scans
+      # Requis pour les scans d'images Cortex CLI
       - name: Set up Java 11
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '11'
 
-      # Install Cortex CLI via Homebrew
+      # Installation de Cortex CLI via Homebrew
       - name: Install Cortex CLI
         run: |
           brew tap paloaltonetworks/cortexcli
           brew install cortexcli
           cortexcli --version
 
-      # Build the local Dockerfile we just created
+      # Construction de l'image locale
       - name: Build Local Demo Image
         run: |
           docker build -t my-local-app:latest .
 
-      # Run the Cortex Image Scan on the freshly built image
-      env:
-        CORTEX_API_BASE_URL: ${{ secrets.CORTEX_API_BASE_URL }}
-        CORTEX_API_KEY_ID: ${{ secrets.CORTEX_API_KEY_ID }}
-        CORTEX_API_KEY: ${{ secrets.CORTEX_API_KEY }}
-      run: |
-        echo "Starting CWP Container Image Scan..."
-        cortexcli image scan my-local-app:latest --soft-fail
+      # Scan de l'image avec Cortex CLI
+      - name: Run Cortex Image Scan
+        env:
+          CORTEX_API_BASE_URL: ${{ secrets.CORTEX_API_BASE_URL }}
+          CORTEX_API_KEY_ID: ${{ secrets.CORTEX_API_KEY_ID }}
+          CORTEX_API_KEY: ${{ secrets.CORTEX_API_KEY }}
+        run: |
+          echo "Starting CWP Container Image Scan..."
+          cortexcli image scan my-local-app:latest --soft-fail
